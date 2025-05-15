@@ -14,7 +14,10 @@ services:
       retries: 5
     restart: always
 
+# ny_taxi_data
+# C:\Users\BLESSING\Desktop\Data_Engineering\Data-Engineering\ny_taxi_data
 
+# https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 
 # docker run -it \
 #  -e POSTGRES_USER="root" \
@@ -23,9 +26,45 @@ services:
 #  -v c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/ny_taxi_data:/var/lib/postgresql/data \ 
 #  -p 5432:5432 \
 #  postgres:13
+
+# TO RUN POSTGRESS IN DOCKER
 # docker run -d -e POSTGRES_USER="root" -e POSTGRES_PASSWORD="root" -e POSTGRES_DB="ny_taxi" -v c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/ny_taxi_data:/var/lib/postgresql/data -p 5432:5432 postgres:13
 
-# ny_taxi_data
-# C:\Users\BLESSING\Desktop\Data_Engineering\Data-Engineering\ny_taxi_data
+# TO RUN PGADMIN IN DOCKER
 
-# https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+# docker run -it \
+#   -e PGADMIN_DEFAULT = "admin@admin.com" \
+#   -e PGADMIN_DEFAULT_PASSWORD = "root" \
+#   -p 8080:80 \
+#   dpage/pgadmin4
+
+# docker run -it -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" -e PGADMIN_DEFAULT_PASSWORD="root" -p 8080:80 dpage/pgadmin4
+
+# NETWORK
+
+
+# docker run -it \
+#  -e POSTGRES_USER="root" \
+#  -e POSTGRES_PASSWORD="root" \
+#  -e POSTGRES_DB="ny_taxi" \
+#  -v c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/ny_taxi_data:/var/lib/postgresql/data \ 
+#  -p 5432:5432 \
+#  --network=pg-networks \
+#  --name pg-database \
+#  postgres:13
+
+# docker run -it \
+#  -e PGADMIN_DEFAULT = "admin@admin.com" \
+#  -e PGADMIN_DEFAULT_PASSWORD = "root" \
+#  -p 8080:80 \
+#  --network=pg-networks \
+#  --name pg-database \
+#  dpage/pgadmin4
+
+# docker network create pg-network
+
+# docker run -it -e POSTGRES_USER="root" -e POSTGRES_PASSWORD="root" -e POSTGRES_DB="ny_taxi" -v c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/ny_taxi_data:/var/lib/postgresql/data -p 5432:5432 --network=pg-network --name pg-dB postgres:13
+# docker run -it -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" -e PGADMIN_DEFAULT_PASSWORD="root" -p 8080:80 --network=pg-network --name pgadmin dpage/pgadmin4
+
+
+
