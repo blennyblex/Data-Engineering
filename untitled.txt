@@ -1,0 +1,109 @@
+# ny_taxi_data
+# C:\Users\BLESSING\Desktop\Data_Engineering\Data-Engineering\ny_taxi_data
+
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    restart: always
+
+
+
+
+# https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+
+docker run -it \
+ -e POSTGRES_USER="root" \
+ -e POSTGRES_PASSWORD="root" \
+ -e POSTGRES_DB="ny_taxi" \
+ -v c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/ny_taxi_data:/var/lib/postgresql/data \ 
+ -p 5432:5432 \
+ postgres:13
+
+# TO RUN POSTGRESS IN DOCKER
+docker run -d -e POSTGRES_USER="root" -e POSTGRES_PASSWORD="root" -e POSTGRES_DB="ny_taxi" -v c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/ny_taxi_data:/var/lib/postgresql/data -p 5432:5432 postgres:13
+
+pgcli -h localhost -p 5432 -u root -d ny_taxi
+
+# TO RUN PGADMIN IN DOCKER
+
+docker run -it \
+  -e PGADMIN_DEFAULT = "admin@admin.com" \
+  -e PGADMIN_DEFAULT_PASSWORD = "root" \
+  -p 8080:80 \
+  dpage/pgadmin4
+
+# docker run -it -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" -e PGADMIN_DEFAULT_PASSWORD="root" -p 8080:80 dpage/pgadmin4
+
+### NETWORK
+# docker network create pg-network
+
+
+docker run -it \
+ -e POSTGRES_USER="root" \
+ -e POSTGRES_PASSWORD="root" \
+ -e POSTGRES_DB="ny_taxi" \
+ -v c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/ny_taxi_data:/var/lib/postgresql/data \ 
+ -p 5432:5432 \
+ --network=pg-networks \
+ --name pg-dBase \
+ postgres:13
+
+docker run -it \
+ -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
+ -e PGADMIN_DEFAULT_PASSWORD="root" \
+ -p 8080:80 \
+ --network=pg-network \
+ --name pgadminn \
+ dpage/pgadmin4
+
+
+
+docker run -it -e POSTGRES_USER="root" -e POSTGRES_PASSWORD="root" -e POSTGRES_DB="ny_taxi" -v c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/ny_taxi_data:/var/lib/postgresql/data -p 5432:5432 --network=pg-network --name pg-dBase postgres:13
+docker run -it -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" -e PGADMIN_DEFAULT_PASSWORD="root" -p 8080:80 --network=pg-network --name pgadminn dpage/pgadmin4
+
+docker start pg-dBase
+docker start pgadminn
+
+# TO RUN THE ingest_data.py
+python ingest_data.py --user=root --password=root --host=localhost --port=5432 --db=ny_taxi  --taxi_table_name=yellow_taxi_trips --zones_table_name=taxi_zone --taxi_csv_name=c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/yellow_tripdata_2025-01.parquet --zones_csv_name=C:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/taxi_zone_lookup.csv
+
+python ingest_data.py \
+--user=root --password=root \
+--host=localhost \
+--port=5432 \
+--db=ny_taxi  \
+--table_name=yellow_taxi_trips \
+--csv_name=c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering/yellow_tripdata_2025-01.parquet
+
+# TO BUILD THE DOCKERIZED PYTHON CODE (INGEST_DATA.PY)
+
+docker build -t taxi_ingest:v001 .
+
+# TO RUN the built image
+docker run -it -v "c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering:/data" taxi_ingest:v001 --user=root --password=root --host=pg-dBase --port=5432 --db=ny_taxi --taxi_table_name=yellow_taxi_trips --zones_table_name=taxi_zone --taxi_csv_name=/data/yellow_tripdata_2025-01.parquet --zones_csv_name=/data/taxi_zone_lookup.csv
+
+docker run -it --network=pg-network \
+-v "c:/Users/BLESSING/Desktop/Data_Engineering/Data-Engineering:/data" \
+taxi_ingest:v001 \
+--user=root \
+--password=root \
+--host=pg-dBase \
+--port=5432 \
+--db=ny_taxi \
+--taxi_table_name=yellow_taxi_trips \
+--zones_table_name=taxi_zone \
+--taxi_csv_name=/data/yellow_tripdata_2025-01.parquet \
+--zones_csv_name=/data/taxi_zone_lookup.csv
+
