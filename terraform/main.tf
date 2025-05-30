@@ -1,3 +1,4 @@
+# provider: searched - terraform google cloud provider
 terraform {
   required_providers {
     google = {
@@ -9,15 +10,16 @@ terraform {
 
 provider "google" {
   # Configuration options
-#   credentials = "./keys/my_cred.json"
-  project = "learned-maker-461014-p6"
-  region  = "us-central1"
+  credentials = file(var.credentials)
+  project     = var.project
+  region      = var.region
 }
 
-
+# bucket creation : searched - terraform google cloud storage bucket
+# google_storage_bucket - resource name
 resource "google_storage_bucket" "demo-bucket" {
-  name          = "learned-maker-461014-p6-terra-bucket"
-  location      = "US"
+  name          = var.gcs_bucket_name
+  location      = var.location
   force_destroy = true
 
   lifecycle_rule {
@@ -37,4 +39,12 @@ resource "google_storage_bucket" "demo-bucket" {
       type = "AbortIncompleteMultipartUpload"
     }
   }
+}
+
+# bigquery creation: searched - terraform bigquery dataset
+# google_bigquery_dataset - resource name
+resource "google_bigquery_dataset" "demo_dataset" {
+  dataset_id = var.bq_dataset_name
+  location   = var.location
+
 }
