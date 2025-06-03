@@ -28,7 +28,7 @@ volumes:
 
 services:
   postgres:
-    image: postgres
+    image: postgres:17
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
@@ -40,6 +40,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
+    ports:
+      - "5433:5432"
 
   kestra:
     image: kestra/kestra:v0.20.7
@@ -84,10 +86,10 @@ services:
       - "8081:8081"
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
     
   postgres_zoomcamp:
-    image: postgres
+    image: postgres:17
     environment:
       POSTGRES_USER: kestra
       POSTGRES_PASSWORD: k3str4
@@ -95,7 +97,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - "./ny_taxi_data:/var/lib/postgresql/data:rw"
+      - zoomcamp-data:/var/lib/postgresql/data
+      
     depends_on:
       kestra:
         condition: service_started
